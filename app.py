@@ -163,7 +163,7 @@ if df is not None:
             st.write('**Z-Score Method**: Identifies data points that are a certain number of standard deviations away from the mean.')
 
             threshold = st.slider('Select Z-score threshold', 1.0, 5.0, 3.0)
-            z_scores = np.abs((df - df[numerical_cols].mean()) / df.std())
+            z_scores = np.abs((df[numerical_cols] - df[numerical_cols].mean()) / df[numerical_cols].std())
             outliers = (z_scores > threshold).any(axis=1)
 
             st.write(f'{outliers.sum()} outliers detected using Z-score method.')
@@ -172,13 +172,13 @@ if df is not None:
         elif selected_method == 'IQR method':
             st.write('**IQR Method**: Identifies outliers based on the Interquartile Range (IQR).')
 
-            Q1 = df.quantile(0.25)
-            Q3 = df.quantile(0.75)
+            Q1 = df[numerical_cols].quantile(0.25)
+            Q3 = df[numerical_cols].quantile(0.75)
             IQR = Q3 - Q1
 
             lower_bound = Q1 - 1.5 * IQR
             upper_bound = Q3 + 1.5 * IQR
-            outliers = ((df < lower_bound) | (df > upper_bound)).any(axis=1)
+            outliers = ((df[numerical_cols] < lower_bound) | (df[numerical_cols] > upper_bound)).any(axis=1)
 
             st.write(f'{outliers.sum()} outliers detected using IQR method.')
             st.dataframe(df[outliers])
@@ -188,7 +188,7 @@ if df is not None:
 
             contamination = st.slider('Select contamination level', 0.01, 0.5, 0.1)
             iso_forest = IsolationForest(contamination=contamination, random_state=42)
-            outlier_labels = iso_forest.fit_predict(df.select_dtypes(include=[np.number]))
+            outlier_labels = iso_forest.fit_predict(df[numerical_cols])
             outliers = outlier_labels == -1
 
             st.write(f'{outliers.sum()} outliers detected using Isolation Forest method.')
