@@ -306,11 +306,11 @@ if df is not None:
         corr_method = st.selectbox('Select correlation method:', ['Pearson', 'Spearman', 'Kendall'])
         st.warning('Pearson correlation coefficient measures the linear relationship between two variables, while Spearman and Kendall.')
         if corr_method == 'Pearson':
-            corr = df.corr(method='pearson')
+            corr = df[numerical_cols].corr(method='pearson')
         elif corr_method == 'Spearman':
-            corr = df.corr(method='spearman')
+            corr = df[numerical_cols].corr(method='spearman')
         else:
-            corr = df.corr(method='kendall')
+            corr = df[numerical_cols].corr(method='kendall')
 
         fig = px.imshow(corr, title='Correlation Heatmap')
         st.plotly_chart(fig)
