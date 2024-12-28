@@ -158,12 +158,12 @@ if df is not None:
         outlier_methods = ['Z-score method', 'IQR method', 'Isolation Forest method', 'Local Outlier Factor method']
         selected_method = st.selectbox('Select an outlier detection method:', outlier_methods)
         outliers = None
-
+        numerical_cols = col_type[col_type['data_type'] != 'object']['column_name'].tolist()
         if selected_method == 'Z-score method':
             st.write('**Z-Score Method**: Identifies data points that are a certain number of standard deviations away from the mean.')
 
             threshold = st.slider('Select Z-score threshold', 1.0, 5.0, 3.0)
-            z_scores = np.abs((df - df.mean()) / df.std())
+            z_scores = np.abs((df - df[numerical_cols].mean()) / df.std())
             outliers = (z_scores > threshold).any(axis=1)
 
             st.write(f'{outliers.sum()} outliers detected using Z-score method.')
