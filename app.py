@@ -27,35 +27,39 @@ def describe_data(df):
     return df.describe()
 
 def read_file_with_fallback(uploaded_file):
-    # First, try UTF-8
+    import io
+
+    # Convert uploaded file to a byte stream
+    byte_stream = io.BytesIO(uploaded_file.read())
+
+    # Try UTF-8 first
     try:
-        df = pd.read_csv(uploaded_file, encoding='utf-8')
+        df = pd.read_csv(byte_stream, encoding='utf-8')
         return df
     except UnicodeDecodeError:
         pass  # Move on to other encodings
 
     # Detect encoding using chardet
     detector = UniversalDetector()
-    with open(uploaded_file.name, 'rb') as f:
-        for line in f:
-            detector.feed(line)
-            if detector.done:
-                break
-        detector.close()
+    byte_stream.seek(0)  # Reset byte stream
+    for line in byte_stream:
+        detector.feed(line)
+        if detector.done:
+            break
+    detector.close()
 
     detected_encoding = detector.result['encoding']
-    print(f"Detected Encoding: {detected_encoding}")
+    st.write(f"Detected Encoding: {detected_encoding}")
 
     # Try with detected encoding
+    byte_stream.seek(0)  # Reset byte stream
     try:
-        df = pd.read_csv(uploaded_file, encoding=detected_encoding)
+        df = pd.read_csv(byte_stream, encoding=detected_encoding)
         return df
     except Exception as e:
         raise ValueError(f"Could not read the file: {e}")
 
-    # Raise an error if all attempts fail
-    raise ValueError("Failed to decode the file with any common encoding.")
-    
+
 
 st.title('DataInsights :bar_chart:')
 st.markdown("""
